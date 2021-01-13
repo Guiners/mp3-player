@@ -1,51 +1,68 @@
 from tkinter import *
-screen = Tk()
+from tkinter import filedialog
+import tkinter.messagebox
+import vlc
+import os
+import time
 
 class Odtwarzacz(Frame, object):
 
     def __init__(self, master):
         super(Odtwarzacz, self).__init__(master)
-        self.x = 420
-        self.y = 240
-        self.master.geometry("400x200")
-        self.master.resizable(0, 0)
+        self.master = master
+        self.master.geometry("423x200")
         self.master.title("Spotify 2.0")
         self.large_font = ('Verdana', 15)
         self.screen_font = ('Verdana', 40)
         self.is_playing = False
-
+        self.path = []
+        self.przycisk()
 
 
     def przycisk(self):
-        self.button1 = Button(self, text = "odtwarzaj")
-        self.button1['command'] = lambda: self.add_song()
-        self.button1.place(x = 40, y = 170)
+        button1 = Button(self.master, text = "odtwarzaj", command = self.play_song)
+        button1.place(x = 40, y = 170)
+        button2 = Button(self.master, text = "start/stop", command = self.stop_song)
+        button2.place(x = 120, y = 170)
+        button3 = Button(self.master, text = "otwórz folder", command = self.open_file)
+        button3.place(x = 200, y = 170)
+        button4 = Button(self.master, text = "otwórz plik", command = self.open_song)
+        button4.place(x = 300, y = 170)
+        self.song_box = Listbox(self.master, bg = "black", fg =  "white", width = 70)
+        self.song_box.place(x = 0, y = 0)
 
-        self.button2 = Button(self, text = "zatrzymaj")
-        self.button2.place(x = 120, y = 170)
+    def open_song(self):
+        file_path = tkinter.filedialog.askopenfilename(title = "wybierz plik", filetypes = (("wav files", "*.wav"), ("mp3 files", "*.mp3")))
+        self.path.append(file_path)
+        print(file_path)
+        filename = os.path.basename(file_path)
+        #print(filename)
+        self.song_box.insert(END, str(filename))
 
-        self.button3 = Button(self, text = "otwórz folder")
-        self.button3.place(x = 200, y = 170)
+    def open_file(self):
+        playlist = tkinter.filedialog.askdirectory()
+        print(playlist)
+        if len(playlist) > 0:
+            for i in os.listdir(playlist):
+                if i.__contains__(".mp3") or i.__contains__(".wav"):
+                    self.path.append(str(playlist + "/" + i))
+                    print(self.path)
+                    self.song_box.insert(END, i)
 
-        self.button4 = Button(self, text = "otwórz plik")
-        self.button4.place(x = 300, y = 170)
+    def stop_song(self):
+        if self.is_playing == True:
+            self.is_playing == False
+            self.player.pause()
 
-        self.song_box = Listbox(
-            self, bg="black", fg=  "white", width = 180, selectbackground = "yellow")
-        self.song_box.pack(pady = 10)
+    def play_song(self):
+        if self.is_playing == False:
+            for i in self.path:
+                self.player = vlc.MediaPlayer(i)
+                self.player.play()
+        self.is_playing = True
 
-    def add_song(self):
-        pass
 
-"""
-        self.my_menu = Menu(self.master)
-        self.master.config(menu = self.my_menu)
 
-        self.add_song = Menu(self.my_menu)
-        self.my_menu.add_cascade(label="add song", menu = self.add_song)
-        self.add_song.add_command(label = "add one song", command = self.add_song)
-"""
-
+screen = Tk()
 app = Odtwarzacz(screen)
-Odtwarzacz.przycisk(screen)
 screen.mainloop()
