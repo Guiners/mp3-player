@@ -59,6 +59,7 @@ class Odtwarzacz(Frame, object):
             for i in self.path:
                 self.player = vlc.MediaPlayer(i)
                 self.player.play()
+                break
         self.is_playing = True
 
 
